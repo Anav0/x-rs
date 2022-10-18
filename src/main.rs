@@ -1,20 +1,22 @@
 use std::env;
 use std::fs::File;
-use std::io;
 use std::io::prelude::*;
 
 mod misc;
 mod parser;
-mod tokenizer;
 mod symbols;
+mod tokenizer;
 
 use misc::Parameters;
 use parser::Parser;
+use symbols::CodeScope;
 use tokenizer::Tokenizer;
 
 fn main() {
     let args = env::args();
     let params = Parameters::from(args);
+
+    let global_scope = CodeScope::global();
 
     //TODO: better error message
     let mut file = File::open(params.file_path).expect("Failed to open file!");
@@ -25,7 +27,7 @@ fn main() {
         .expect("Failed to read file into string");
 
     let tokenizer = Tokenizer::new(&file_content);
-    let mut parser = Parser::new();
+    let mut parser = Parser::new(global_scope);
 
     parser.parse(tokenizer);
 }
