@@ -7,6 +7,7 @@ mod parser;
 mod symbols;
 mod tokenizer;
 mod declarations;
+mod assembly;
 
 use misc::Parameters;
 use parser::Parser;

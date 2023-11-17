@@ -1,4 +1,4 @@
-use crate::declarations::{AstNode, Root};
+use crate::declarations::{AstNode, NodeType, Root};
 
 use std::{
     fmt,
@@ -11,16 +11,9 @@ use crate::{
     tokenizer::{Token, TokenType, Tokenizer},
 };
 
-#[derive(Debug)]
-pub struct AST<'a, T: AstNode> {
-    pub root: Node<'a, T>,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Node<'a, T: AstNode> {
-    parent: Option<usize>,
-    Children: Vec<Option<usize>>,
-    value: &'a mut T,
+pub struct AST {
+    pub root: Root,
+    pub nodes: Vec<NodeType>,
 }
 
 pub struct Parser {
@@ -34,14 +27,11 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self, tokenizer: Tokenizer) -> AST<Root> {
-        let mut root = Root::default(); 
+    pub fn parse(&mut self, tokenizer: Tokenizer) -> AST {
+        let mut root = Root { children: vec![] };
         let mut ast = AST {
-            root: Node {
-                parent: None,
-                Children: vec![],
-                value: &mut root,
-            },
+            root,
+            nodes: vec![],
         };
 
         let mut iter = tokenizer.peekable();
@@ -82,11 +72,11 @@ impl Parser {
         ast
     }
 
-    fn match_stmt<T: AstNode>(
+    fn match_stmt(
         &mut self,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
-        ast: &mut AST<T>,
+        ast: &mut AST,
     ) -> bool {
         return match current_token.token_type {
             TokenType::LET => {
@@ -126,20 +116,16 @@ impl Parser {
         };
     }
 
-    fn match_optexpr<T: AstNode>(
+    fn match_optexpr(
         &mut self,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
-        ast: &mut AST<T>,
+        ast: &mut AST,
     ) -> bool {
         false
     }
 
-    fn match_expr<T: AstNode>(
-        &mut self,
-        tokenizer: &mut Peekable<Tokenizer>,
-        ast: &mut AST<T>,
-    ) -> bool {
+    fn match_expr(&mut self, tokenizer: &mut Peekable<Tokenizer>, ast: &mut AST) -> bool {
         let mut next_token = tokenizer.next();
 
         if next_token.is_none() {
@@ -151,20 +137,20 @@ impl Parser {
         false
     }
 
-    fn match_term<T: AstNode>(
+    fn match_term(
         &mut self,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
-        ast: &mut AST<T>,
+        ast: &mut AST,
     ) -> bool {
         return self.match_digit(&current_token) || self.match_ident(&current_token);
     }
 
-    fn match_oper<T: AstNode>(
+    fn match_oper(
         &mut self,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
-        ast: &mut AST<T>,
+        ast: &mut AST,
     ) -> bool {
         false
     }

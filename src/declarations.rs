@@ -1,15 +1,17 @@
 use crate::tokenizer::{Literals, TokenType};
 
-pub trait AstNode {}
-
-pub struct Root;
-impl Default for Root {
-    fn default() -> Self {
-        Self {}
-    }
+pub enum NodeType {
+    Variable(VariableDecl)
 }
 
-impl AstNode for Root {}
+pub struct AstNode
+{
+    pub node_type: NodeType,
+}
+
+pub struct Root {
+    pub children: Vec<NodeType>
+}
 
 pub struct CompoundStmt;
 
@@ -18,4 +20,5 @@ pub struct LiteralDecl {
 }
 pub struct VariableDecl {
     pub identifier: String,
+    pub literal: LiteralDecl,
 }
