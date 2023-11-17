@@ -3,5 +3,6 @@
 
 
 
-let x = 2;
+let x = 1000;
+let y = 2000;
 # let y = x + 2;

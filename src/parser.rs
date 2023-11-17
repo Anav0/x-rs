@@ -69,7 +69,9 @@ impl Parser {
                 continue;
             }
 
-            let stmt = self.match_stmt(current_token, &mut iter, chars, &mut ast).expect("Failed to match statment");
+            let stmt = self
+                .match_stmt(current_token, &mut iter, chars, &mut ast)
+                .expect("Failed to match statment");
 
             ast.root.children.push(NodeType::Stmt(stmt));
         }
@@ -109,28 +111,24 @@ impl Parser {
                     panic!("No '=' found in assigment statment!");
                 }
 
-                let literalValue = self
-                    .match_literal(current_token, tokenizer, chars, ast)
+                let next_token = tokenizer.next()?;
+
+                let literal_value = self
+                    .match_literal(next_token, tokenizer, chars, ast)
                     .expect("Failed to match literal");
 
-                let next_token = tokenizer.next();
-                if !next_token.is_none() {
-                    let literal = LiteralDecl {
-                        value: literalValue,
-                    };
+                let literal = LiteralDecl {
+                    value: literal_value,
+                };
 
-                    let decl = VariableDecl {
-                        identifier,
-                        literal,
-                    };
+                let decl = VariableDecl {
+                    identifier,
+                    literal,
+                };
 
-                    stmt.children.push(NodeType::Variable(decl));
+                stmt.children.push(NodeType::Variable(decl));
 
-                    return Some(stmt);
-                    //return next_token.unwrap().token_type == TokenType::COMMA;
-                }
-
-                None
+                return Some(stmt);
             }
             _ => None,
         };

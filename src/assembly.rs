@@ -27,7 +27,7 @@ impl Assembler {
     pub fn foo(&mut self, nodes: &Vec<NodeType>) {
         for node_type in nodes {
             match node_type {
-                NodeType::Variable(variableDecl) => {}
+                NodeType::Variable(variableDecl) => self.var(variableDecl),
                 NodeType::Stmt(stmt) => return self.foo(&stmt.children),
             }
         }
@@ -37,23 +37,24 @@ impl Assembler {
         self.foo(&ast.root.children)
     }
 
-    pub fn var(&mut self, variableDecl: VariableDecl) {
-        let var_type = match variableDecl.literal.value {
+    pub fn var(&mut self, variable_decl: &VariableDecl) {
+        let var_type = match variable_decl.literal.value {
             Literals::NUMBER(_) => "QWORD",
             Literals::STR(_) => "QWORD",
         };
 
-        let var_size: u8 = match variableDecl.literal.value {
+        let var_size: u8 = match variable_decl.literal.value {
             Literals::NUMBER(_) => 16,
             Literals::STR(_) => 32,
         };
 
-        let var_value = match variableDecl.literal.value {
-            Literals::NUMBER(value) => value.to_string(),
+        let var_value = match &variable_decl.literal.value {
+            Literals::NUMBER(value) => value,
             Literals::STR(value) => value,
         };
 
-        self.output += &format!("{var_type} PTR [rbp={var_size}], {var_value}");
+        let v = &variable_decl.identifier;
+        self.output += &format!("{var_type} PTR [rbp={var_size}], {var_value} ; {v}");
     }
 
     pub fn build(&mut self) {

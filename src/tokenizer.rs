@@ -2,7 +2,7 @@ const COMMENT_CHAR: char = '#';
 
 pub enum Literals {
     NUMBER(String),
-    STR(String)
+    STR(String),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -110,13 +110,15 @@ impl Iterator for Tokenizer {
                     token_type = TokenType::IF;
                 }
 
-                token_buffer.clear();
-
-                return Some(Token {
+                let result = Some(Token {
                     token_type,
                     start: i - token_buffer.len() - 1,
                     end: i,
                 });
+
+                token_buffer.clear();
+
+                return result;
             } else if !char.is_whitespace() {
                 token_buffer.push(char);
             }

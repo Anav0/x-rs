@@ -35,4 +35,5 @@ fn main() {
     let ast = parser.parse(tokenizer);
 
     assembly.from_ast(&ast);
+    assembly.build();
 }
