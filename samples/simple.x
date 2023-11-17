@@ -5,4 +5,5 @@
 
 let x = 1000;
 let y = 2000;
+let z = 3000;
 # let y = x + 2;

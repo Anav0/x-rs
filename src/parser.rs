@@ -1,14 +1,18 @@
 use crate::{
-    assembly::Assembler,
-    declarations::{AstNode, CompoundStmt, LiteralDecl, NodeType, Root, VariableDecl},
-    tokenizer::Literals,
+    declarations::{Literals, CompoundStmt, LiteralDecl, NodeType, Root, VariableDecl},
 };
 
 use std::{
-    fmt,
     iter::Peekable,
-    thread::{current, scope},
 };
+
+//TODO: move
+pub fn get_var_size(decl: &VariableDecl) -> u16 {
+ match decl.literal.value {
+            Literals::NUMBER(_) => 16, //NOTE: for now all numbers have the same size
+            Literals::STR(_) => 32,
+        }
+    }
 
 use crate::{
     symbols::CodeScope,
@@ -42,11 +46,12 @@ impl Parser {
         let mut iter = tokenizer.peekable();
         let mut current_scope_index: Option<usize> = Some(0);
 
+        let mut new_scope = CodeScope::new(None);
         while let Some(current_token) = iter.next() {
             if current_token.token_type == TokenType::LeftBrace {
-                let new_scope = CodeScope::new(current_scope_index);
+                new_scope = CodeScope::new(current_scope_index);
                 let scope_index = self.scopes.len();
-                self.scopes.push(new_scope);
+                self.scopes.push(new_scope.clone());
                 self.scopes[current_scope_index.unwrap()].add_nested_scope(scope_index);
 
                 current_scope_index = Some(scope_index);
@@ -70,7 +75,7 @@ impl Parser {
             }
 
             let stmt = self
-                .match_stmt(current_token, &mut iter, chars, &mut ast)
+                .match_stmt(&mut new_scope, current_token, &mut iter, chars, &mut ast)
                 .expect("Failed to match statment");
 
             ast.root.children.push(NodeType::Stmt(stmt));
@@ -81,12 +86,13 @@ impl Parser {
 
     fn match_stmt(
         &mut self,
+        scope: &mut CodeScope,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
         chars: &Vec<char>,
         ast: &mut AST,
     ) -> Option<CompoundStmt> {
-        let mut stmt = CompoundStmt::default();
+        let mut stmt = CompoundStmt::new(0);
 
         return match current_token.token_type {
             TokenType::LET => {
@@ -122,9 +128,12 @@ impl Parser {
                 };
 
                 let decl = VariableDecl {
+                    stack_offset: scope.stack_pointer,
                     identifier,
                     literal,
                 };
+
+                scope.stack_pointer += get_var_size(&decl);
 
                 stmt.children.push(NodeType::Variable(decl));
 
@@ -133,6 +142,8 @@ impl Parser {
             _ => None,
         };
     }
+
+    
 
     fn match_literal(
         &mut self,

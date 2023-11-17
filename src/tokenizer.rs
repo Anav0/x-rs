@@ -1,10 +1,5 @@
 const COMMENT_CHAR: char = '#';
 
-pub enum Literals {
-    NUMBER(String),
-    STR(String),
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
     // General

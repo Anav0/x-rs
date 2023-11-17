@@ -1,25 +1,23 @@
 use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    marker::PhantomData,
+    collections::{HashMap},
 };
 
 use crate::tokenizer::{Token, TokenType};
 
-type Stack<T> = VecDeque<T>;
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CodeScope {
+    pub stack_pointer: u16,
     pub symbols: HashMap<String, Token>,
-
     pub was_closed: bool,
-
     pub parent_scope: Option<usize>,
+
     nested_scopes: Vec<usize>,
 }
 
 impl CodeScope {
     pub fn global() -> Self {
         Self {
+            stack_pointer: 0,
             symbols: HashMap::new(),
             nested_scopes: vec![],
             parent_scope: None,
@@ -28,6 +26,7 @@ impl CodeScope {
     }
     pub fn new(parent_scope: Option<usize>) -> Self {
         Self {
+            stack_pointer: 0,
             symbols: HashMap::new(),
             nested_scopes: vec![],
             parent_scope,

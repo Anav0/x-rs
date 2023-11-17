@@ -1,9 +1,8 @@
 use std::fs;
 
 use crate::{
-    declarations::{NodeType, VariableDecl},
-    parser::AST,
-    tokenizer::Literals,
+    declarations::{NodeType, VariableDecl, Literals},
+    parser::{AST, get_var_size},
 };
 
 pub struct Assembler {
@@ -43,10 +42,9 @@ impl Assembler {
             Literals::STR(_) => panic!("String is not yet supported as a variable declaration type"),
         };
 
-        let var_size: u8 = match variable_decl.literal.value {
-            Literals::NUMBER(_) => 16,
-            Literals::STR(_) => 32,
-        };
+        let var_size: u16 = get_var_size(variable_decl);
+
+        let offset = variable_decl.stack_offset + var_size;
 
         let var_value = match &variable_decl.literal.value {
             Literals::NUMBER(value) => value,
@@ -55,7 +53,7 @@ impl Assembler {
 
         let v = &variable_decl.identifier;
         //TODO: move memory offset with each subsequent variable declaration
-        self.output += &format!("{var_type} PTR [rbp-{var_size}], {var_value} ; {v}\n");
+        self.output += &format!("{var_type} PTR [rbp-{offset}], {var_value} ; {v}\n");
     }
 
     pub fn build(&mut self) {
