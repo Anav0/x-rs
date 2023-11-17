@@ -41,3 +41,9 @@ pub struct VariableDecl {
     pub identifier: String,
     pub literal: LiteralDecl,
 }
+
+pub struct FunctionDecl {
+    pub stack_offset: u16,
+    pub identifier: String,
+    pub literal: LiteralDecl,
+}

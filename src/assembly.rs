@@ -36,6 +36,8 @@ impl Assembler {
         self.assemble_based_on_nodes(&ast.root.children)
     }
 
+    pub fn func(& mut self) {}
+
     pub fn var(&mut self, variable_decl: &VariableDecl) {
         let var_type = match variable_decl.literal.value {
             Literals::NUMBER(_) => "QWORD",

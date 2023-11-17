@@ -15,6 +15,10 @@ pub enum TokenType {
     RightBrace,
     COMMA,
 
+    FnCall,
+LeftParenthesis,
+RightParenthesis,
+
     // Operators
     PLUS,
     MINUS,
@@ -47,6 +51,8 @@ impl Iterator for Tokenizer {
         let mut current_token_ends = false;
         let mut skip_comment = false;
 
+        let mut is_fn_arg = false;
+
         for i in self.index..self.chars.len() {
             let char = self.chars[i];
             self.index += 1;
@@ -69,6 +75,7 @@ impl Iterator for Tokenizer {
                 continue;
             }
 
+            // We read whole ident
             if current_token_ends && token_buffer.len() > 0 {
                 let ident = token_buffer.iter().collect::<String>();
                 let mut token_type = match token_buffer[0] {
@@ -80,6 +87,8 @@ impl Iterator for Tokenizer {
                     '{' => TokenType::LeftBrace,
                     '}' => TokenType::RightBrace,
                     ';' => TokenType::COMMA,
+                    '(' => TokenType::LeftParenthesis,
+                    ')' => TokenType::RightParenthesis,
                     _ => TokenType::IDENT(ident.clone()),
                 };
 
@@ -103,6 +112,11 @@ impl Iterator for Tokenizer {
 
                 if ident == "if" {
                     token_type = TokenType::IF;
+                }
+
+                if self.chars[i+1] == '(' {
+                    token_type = TokenType::FnCall;
+                    is_fn_arg = true;
                 }
 
                 let result = Some(Token {
