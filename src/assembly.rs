@@ -24,23 +24,23 @@ impl Assembler {
         assem
     }
 
-    pub fn foo(&mut self, nodes: &Vec<NodeType>) {
+    pub fn assemble_based_on_nodes(&mut self, nodes: &Vec<NodeType>) {
         for node_type in nodes {
             match node_type {
-                NodeType::Variable(variableDecl) => self.var(variableDecl),
-                NodeType::Stmt(stmt) => return self.foo(&stmt.children),
+                NodeType::Variable(variable_decl) => self.var(variable_decl),
+                NodeType::Stmt(stmt) => self.assemble_based_on_nodes(&stmt.children),
             }
         }
     }
 
     pub fn from_ast(&mut self, ast: &AST) {
-        self.foo(&ast.root.children)
+        self.assemble_based_on_nodes(&ast.root.children)
     }
 
     pub fn var(&mut self, variable_decl: &VariableDecl) {
         let var_type = match variable_decl.literal.value {
             Literals::NUMBER(_) => "QWORD",
-            Literals::STR(_) => "QWORD",
+            Literals::STR(_) => panic!("String is not yet supported as a variable declaration type"),
         };
 
         let var_size: u8 = match variable_decl.literal.value {
@@ -54,7 +54,8 @@ impl Assembler {
         };
 
         let v = &variable_decl.identifier;
-        self.output += &format!("{var_type} PTR [rbp={var_size}], {var_value} ; {v}");
+        //TODO: move memory offset with each subsequent variable declaration
+        self.output += &format!("{var_type} PTR [rbp={var_size}], {var_value} ; {v}\n");
     }
 
     pub fn build(&mut self) {
