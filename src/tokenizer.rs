@@ -1,5 +1,10 @@
 const COMMENT_CHAR: char = '#';
 
+pub enum Literals {
+    NUMBER(usize),
+    STR(String)
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
     // General
@@ -13,6 +18,7 @@ pub enum TokenType {
     //Separators
     LeftBrace,
     RightBrace,
+    COMMA,
 
     // Operators
     PLUS,
@@ -34,7 +40,7 @@ pub struct Token {
 }
 
 pub struct Tokenizer {
-    pub index: usize,
+    index: usize,
     chars: Vec<char>,
 }
 
@@ -78,6 +84,7 @@ impl Iterator for Tokenizer {
                     '/' => TokenType::DIV,
                     '{' => TokenType::LeftBrace,
                     '}' => TokenType::RightBrace,
+                    ';' => TokenType::COMMA,
                     _ => TokenType::IDENT(ident.clone()),
                 };
 
@@ -125,6 +132,15 @@ impl Tokenizer {
             index: 0,
         }
     }
+
+    pub fn get_index(&self) -> usize {
+        self.index
+    }
+
+    pub fn reset_index(&mut self, index: usize) {
+        self.index = index;
+    }
+
     pub fn get_chars(&self) -> &Vec<char> {
         &self.chars
     }

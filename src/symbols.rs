@@ -7,30 +7,31 @@ use crate::tokenizer::{Token, TokenType};
 
 type Stack<T> = VecDeque<T>;
 
-pub struct CodeScope<'a> {
+#[derive(Debug)]
+pub struct CodeScope {
     pub symbols: HashMap<String, Token>,
+
+    pub was_closed: bool,
 
     pub parent_scope: Option<usize>,
     nested_scopes: Vec<usize>,
-
-    phantom: PhantomData<&'a str>,
 }
 
-impl<'a> CodeScope<'a> {
+impl CodeScope {
     pub fn global() -> Self {
         Self {
             symbols: HashMap::new(),
             nested_scopes: vec![],
-            phantom: PhantomData {},
             parent_scope: None,
+            was_closed: false,
         }
     }
     pub fn new(parent_scope: Option<usize>) -> Self {
         Self {
             symbols: HashMap::new(),
             nested_scopes: vec![],
-            phantom: PhantomData {},
             parent_scope,
+            was_closed: false,
         }
     }
 

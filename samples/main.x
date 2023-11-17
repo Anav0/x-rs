@@ -2,8 +2,13 @@
 # Syntax is prone to change!
 
 {
-    let a = 2 + 3;
+    let y = 2;
     {
         let b = 8;
+
+        {
+            # Some comment in the third scope
+        }
     }
+    { let c = 10; }
 }
