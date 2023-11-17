@@ -1,0 +1,6 @@
+Lexer  - Trzyma znaki z pliku
+Parser - Trzyma tokeny i tworzy z nich AST
+AST    - Ma drzewo składniowe
+Scope  - Trzyma info o symbolach
+
+Vec<char> <- tokenizer
