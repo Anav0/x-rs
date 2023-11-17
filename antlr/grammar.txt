@@ -1,0 +1,25 @@
+# 98 str przykład parsera
+
+stmt    ->   let ident = expr ;
+           | if ( expr ) stmt
+           | if ( expr ) stmt else stmt
+           | for ( optexpr ; optexpr ; optexpr) stmt
+
+optexpr -> epsilon | expr
+expr    -> expr oper term | term
+term    -> digit | ident
+oper    -> + | - | * | / | =
+digit   -> 0..9
+ident   -> a..z
+
+
+# Przykładowe wyprowadzenia gramatyki
+# 1
+stmt
+ident = expr ;
+a = expr oper term
+a = expr oper term oper term
+a = 9 + 10 - c ;
+
+# 2
+stmt
