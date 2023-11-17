@@ -20,7 +20,7 @@
                 }
             },
             "args": [
-                ".\\samples\\main.x"
+                ".\\samples\\simple.x"
             ],
             "cwd": "${workspaceFolder}"
         }
