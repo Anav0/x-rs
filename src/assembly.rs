@@ -55,7 +55,7 @@ impl Assembler {
 
         let v = &variable_decl.identifier;
         //TODO: move memory offset with each subsequent variable declaration
-        self.output += &format!("{var_type} PTR [rbp={var_size}], {var_value} ; {v}\n");
+        self.output += &format!("{var_type} PTR [rbp-{var_size}], {var_value} ; {v}\n");
     }
 
     pub fn build(&mut self) {
