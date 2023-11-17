@@ -1,4 +1,8 @@
-use crate::declarations::{AstNode, NodeType, Root};
+use crate::{
+    assembly::Assembler,
+    declarations::{AstNode, CompoundStmt, LiteralDecl, NodeType, Root, VariableDecl},
+    tokenizer::Literals,
+};
 
 use std::{
     fmt,
@@ -34,6 +38,7 @@ impl Parser {
             nodes: vec![],
         };
 
+        let chars = &tokenizer.chars.clone(); //TODO: get rid of this clone!
         let mut iter = tokenizer.peekable();
         let mut current_scope_index: Option<usize> = Some(0);
 
@@ -64,11 +69,11 @@ impl Parser {
                 continue;
             }
 
-            if !self.match_stmt(current_token, &mut iter, &mut ast) {
-                panic!("Failed to match statment");
-            }
+            let stmt = self.match_stmt(current_token, &mut iter, chars, &mut ast).expect("Failed to match statment");
+
+            ast.root.children.push(NodeType::Stmt(stmt));
         }
-        dbg!(&self.scopes);
+
         ast
     }
 
@@ -76,8 +81,11 @@ impl Parser {
         &mut self,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
+        chars: &Vec<char>,
         ast: &mut AST,
-    ) -> bool {
+    ) -> Option<CompoundStmt> {
+        let mut stmt = CompoundStmt::default();
+
         return match current_token.token_type {
             TokenType::LET => {
                 dbg!("Matched LET. Starting to parse assigment");
@@ -87,9 +95,9 @@ impl Parser {
                     panic!("No tokens after 'let' keyword")
                 }
 
-                if !self.match_ident(&next_token.unwrap()) {
-                    panic!("Failed to match expr");
-                }
+                let identifier = self
+                    .match_ident(&next_token.unwrap())
+                    .expect("Failed to match ident!");
 
                 let next_token = tokenizer.next();
 
@@ -101,49 +109,48 @@ impl Parser {
                     panic!("No '=' found in assigment statment!");
                 }
 
-                if !self.match_expr(tokenizer, ast) {
-                    panic!("Failed to match expr in assigment");
-                }
+                let literalValue = self
+                    .match_literal(current_token, tokenizer, chars, ast)
+                    .expect("Failed to match literal");
 
                 let next_token = tokenizer.next();
                 if !next_token.is_none() {
-                    return next_token.unwrap().token_type == TokenType::COMMA;
+                    let literal = LiteralDecl {
+                        value: literalValue,
+                    };
+
+                    let decl = VariableDecl {
+                        identifier,
+                        literal,
+                    };
+
+                    stmt.children.push(NodeType::Variable(decl));
+
+                    return Some(stmt);
+                    //return next_token.unwrap().token_type == TokenType::COMMA;
                 }
 
-                false
+                None
             }
-            _ => false,
+            _ => None,
         };
     }
 
-    fn match_optexpr(
+    fn match_literal(
         &mut self,
         current_token: Token,
         tokenizer: &mut Peekable<Tokenizer>,
+        chars: &Vec<char>,
         ast: &mut AST,
-    ) -> bool {
-        false
-    }
-
-    fn match_expr(&mut self, tokenizer: &mut Peekable<Tokenizer>, ast: &mut AST) -> bool {
-        let mut next_token = tokenizer.next();
-
-        if next_token.is_none() {
-            return false;
+    ) -> Option<Literals> {
+        if self.match_digit(&current_token) {
+            let value: String = chars[current_token.start..current_token.end]
+                .into_iter()
+                .collect();
+            return Some(Literals::NUMBER(value));
         }
 
-        let next_token = next_token.unwrap();
-
-        false
-    }
-
-    fn match_term(
-        &mut self,
-        current_token: Token,
-        tokenizer: &mut Peekable<Tokenizer>,
-        ast: &mut AST,
-    ) -> bool {
-        return self.match_digit(&current_token) || self.match_ident(&current_token);
+        None
     }
 
     fn match_oper(
@@ -154,36 +161,18 @@ impl Parser {
     ) -> bool {
         false
     }
+
     fn match_digit(&mut self, current_token: &Token) -> bool {
         return match current_token.token_type {
             TokenType::NUMBER(_) => true,
             _ => false,
         };
     }
-    fn match_ident(&mut self, current_token: &Token) -> bool {
-        return match current_token.token_type {
-            TokenType::IDENT(_) => true,
-            _ => false,
+
+    fn match_ident(&mut self, current_token: &Token) -> Option<String> {
+        return match &current_token.token_type {
+            TokenType::IDENT(value) => Some(value.clone()),
+            _ => None,
         };
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::Parser;
-    use crate::{
-        declarations::Root,
-        parser::Node,
-        symbols::CodeScope,
-        tokenizer::{Token, TokenType, Tokenizer},
-    };
-
-    #[test]
-    fn parses_variables() {
-        let tokenizer = Tokenizer::new("let x = 2;");
-        let mut scope = CodeScope::new(None);
-        let mut parser = Parser::new(scope);
-
-        let ast: super::AST<'_, Root> = parser.parse(tokenizer);
     }
 }

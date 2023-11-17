@@ -9,6 +9,7 @@ mod tokenizer;
 mod declarations;
 mod assembly;
 
+use assembly::Assembler;
 use misc::Parameters;
 use parser::Parser;
 use symbols::CodeScope;
@@ -30,5 +31,8 @@ fn main() {
     let tokenizer  = Tokenizer::new(&file_content);
     let mut parser = Parser::new(global_scope);
 
-    parser.parse(tokenizer);
+    let mut assembly = Assembler::new("out");
+    let ast = parser.parse(tokenizer);
+
+    assembly.from_ast(&ast);
 }

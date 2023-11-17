@@ -1,7 +1,7 @@
 const COMMENT_CHAR: char = '#';
 
 pub enum Literals {
-    NUMBER(usize),
+    NUMBER(String),
     STR(String)
 }
 
@@ -41,7 +41,7 @@ pub struct Token {
 
 pub struct Tokenizer {
     index: usize,
-    chars: Vec<char>,
+    pub chars: Vec<char>,
 }
 
 impl Iterator for Tokenizer {
@@ -139,10 +139,6 @@ impl Tokenizer {
 
     pub fn reset_index(&mut self, index: usize) {
         self.index = index;
-    }
-
-    pub fn get_chars(&self) -> &Vec<char> {
-        &self.chars
     }
 }
 #[cfg(test)]
