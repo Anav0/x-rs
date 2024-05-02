@@ -29,13 +29,13 @@ impl Assembler {
         for node_type in nodes {
             match node_type {
                 NodeType::Variable(variable_decl) => self.var(variable_decl),
-                NodeType::Stmt(stmt) => self.assemble_based_on_nodes(&stmt.children),
+                NodeType::Stmt(stmt) => {},
             }
         }
     }
 
     pub fn from_ast(&mut self, ast: &AST) {
-        self.assemble_based_on_nodes(&ast.root.children)
+        self.assemble_based_on_nodes(&ast.nodes)
     }
 
     pub fn func(& mut self) {}

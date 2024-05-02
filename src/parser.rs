@@ -1,5 +1,5 @@
 use crate::{
-    declarations::{Literals, CompoundStmt, LiteralDecl, NodeType, Root, VariableDecl},
+    declarations::{Literals, CompoundStmt, LiteralDecl, NodeType, VariableDecl},
 };
 
 use std::{
@@ -20,7 +20,6 @@ use crate::{
 };
 
 pub struct AST {
-    pub root: Root,
     pub nodes: Vec<NodeType>,
 }
 
@@ -36,9 +35,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self, tokenizer: Tokenizer) -> AST {
-        let mut root = Root { children: vec![] };
         let mut ast = AST {
-            root,
             nodes: vec![],
         };
 
@@ -80,7 +77,9 @@ impl Parser {
                 .match_stmt(&mut new_scope, current_token, &mut iter, chars, &mut ast)
                 .expect("Failed to match statment");
 
-            ast.root.children.push(NodeType::Stmt(stmt));
+            //Add to root node
+            ast.nodes.push(NodeType::Stmt(stmt));
+        
         }
 
         ast
@@ -138,7 +137,8 @@ impl Parser {
 
                 scope.stack_pointer += get_var_size(&decl);
 
-                stmt.children.push(NodeType::Variable(decl));
+                ast.nodes.push(NodeType::Variable(decl));
+                stmt.children.push(ast.nodes.len()-1);
 
                 return Some(stmt);
             }

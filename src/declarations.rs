@@ -5,20 +5,10 @@ pub enum NodeType {
     Stmt(CompoundStmt),
 }
 
-pub struct AstNode {
-    pub node_type: NodeType,
-}
-
-pub struct Root {
-    pub children: Vec<NodeType>,
-}
-
-// STATEMENTS
-
 #[derive(Debug, PartialEq)]
 pub struct CompoundStmt {
     pub stack_offset: u16,
-    pub children: Vec<NodeType>,
+    pub children: Vec<usize>,
 }
 
 impl CompoundStmt {
