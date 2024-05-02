@@ -48,6 +48,7 @@ impl Parser {
 
         let mut new_scope = CodeScope::new(None);
         while let Some(current_token) = iter.next() {
+            //Create new scope
             if current_token.token_type == TokenType::LeftBrace {
                 new_scope = CodeScope::new(current_scope_index);
                 let scope_index = self.scopes.len();
@@ -58,6 +59,7 @@ impl Parser {
                 continue;
             }
 
+            //Finalize current scope
             if current_token.token_type == TokenType::RightBrace {
                 if current_scope_index.is_none() {
                     panic!("Lone right brace!")
@@ -113,6 +115,7 @@ impl Parser {
                     panic!("No token after identifier!");
                 }
 
+                // EQUAL sign
                 if next_token.unwrap().token_type != TokenType::EQUAL {
                     panic!("No '=' found in assigment statment!");
                 }
@@ -153,7 +156,7 @@ impl Parser {
         ast: &mut AST,
     ) -> Option<Literals> {
         if self.match_digit(&current_token) {
-            let value: String = chars[current_token.start..current_token.end]
+            let value: String = chars[current_token.start..current_token.start+current_token.len]
                 .into_iter()
                 .collect();
             return Some(Literals::NUMBER(value));
@@ -183,5 +186,28 @@ impl Parser {
             TokenType::IDENT(value) => Some(value.clone()),
             _ => None,
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::tokenizer::{Token, Tokenizer};
+    use crate::declarations::{NodeType, CompoundStmt };
+    use crate::symbols::{CodeScope};
+
+    use super::Parser;
+
+    #[test]
+    fn parse_simple_assigment() {
+        let global_scope = CodeScope::global();
+
+        let tokenizer = Tokenizer::new("let x = 123; let y = 456;");
+
+        let mut parser = Parser::new(global_scope);
+
+        let ast = parser.parse(tokenizer);
+
+        assert_eq!(ast.nodes.len(), 8);
+        assert_eq!(ast.nodes[0], NodeType::Stmt( CompoundStmt { stack_offset: 0, children: vec![] } ));
     }
 }

@@ -5,6 +5,8 @@ use crate::{
     parser::{AST, get_var_size},
 };
 
+pub struct Instuction {}
+
 pub struct Assembler {
     output: String,
     filename: String,

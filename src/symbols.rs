@@ -67,13 +67,34 @@ mod tests {
         scope.add_symbol(Token {
             token_type: TokenType::IDENT(String::from("a")),
             start: 0,
-            end: 0,
+            len: 1,
         });
 
         scope.add_symbol(Token {
             token_type: TokenType::IDENT(String::from("a")),
-            start: 0,
-            end: 0,
+            start: 2,
+            len: 1,
         });
+    }
+
+    #[test]
+    fn add_different_symbol() {
+        let mut scope = CodeScope::new(None);
+
+        scope.add_symbol(Token {
+            token_type: TokenType::IDENT(String::from("a")),
+            start: 0,
+            len: 1,
+        });
+
+        scope.add_symbol(Token {
+            token_type: TokenType::IDENT(String::from("b")),
+            start: 1,
+            len: 1,
+        });
+
+        assert_eq!(true, scope.symbols.contains_key("a"));
+        assert_eq!(true, scope.symbols.contains_key("b"));
+        assert_eq!(2, scope.symbols.len());
     }
 }

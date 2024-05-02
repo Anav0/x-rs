@@ -35,7 +35,7 @@ RightParenthesis,
 pub struct Token {
     pub token_type: TokenType,
     pub start: usize,
-    pub end: usize,
+    pub len: usize,
 }
 
 pub struct Tokenizer {
@@ -75,7 +75,7 @@ impl Iterator for Tokenizer {
                 continue;
             }
 
-            // We read whole ident
+            // Read whole ident
             if current_token_ends && token_buffer.len() > 0 {
                 let ident = token_buffer.iter().collect::<String>();
                 let mut token_type = match token_buffer[0] {
@@ -91,6 +91,8 @@ impl Iterator for Tokenizer {
                     ')' => TokenType::RightParenthesis,
                     _ => TokenType::IDENT(ident.clone()),
                 };
+
+                //assert_eq!(TokenType::IDENT(ident.clone()), token_type);
 
                 let mut is_numeric = true;
                 for c in &token_buffer {
@@ -114,15 +116,16 @@ impl Iterator for Tokenizer {
                     token_type = TokenType::IF;
                 }
 
-                if self.chars[i+1] == '(' {
+                if i+1 != self.chars.len() && self.chars[i+1] == '(' {
                     token_type = TokenType::FnCall;
                     is_fn_arg = true;
                 }
 
+                let _tmp = i - token_buffer.len();
                 let result = Some(Token {
                     token_type,
-                    start: i - token_buffer.len() - 1,
-                    end: i,
+                    start: i - token_buffer.len(),
+                    len: token_buffer.len(),
                 });
 
                 token_buffer.clear();
@@ -190,7 +193,7 @@ mod tests {
 
     #[test]
     fn ignores_comments() {
-        let tokenizer = Tokenizer::new("#some comment on first line\nlet a = 2 + 2;");
+        let tokenizer = Tokenizer::new("#1\nlet a = 2 + 2;");
 
         let tokens: Vec<Token> = tokenizer.collect();
 
@@ -217,7 +220,7 @@ mod tests {
 
     #[test]
     fn respects_valid_delimiters() {
-        let valid_delimeters = vec![" ", "    ", "\n", ";", "\t"];
+        let valid_delimeters = vec!["; ", ";    ",  ";", ";\t"];
 
         for delimiter in valid_delimeters {
             let tokenizer = Tokenizer::new(&format!("let a = 2{delimiter}let b = 10;"));

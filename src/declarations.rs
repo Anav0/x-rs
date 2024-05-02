@@ -1,4 +1,5 @@
 
+#[derive(Debug, PartialEq)]
 pub enum NodeType {
     Variable(VariableDecl),
     Stmt(CompoundStmt),
@@ -14,6 +15,7 @@ pub struct Root {
 
 // STATEMENTS
 
+#[derive(Debug, PartialEq)]
 pub struct CompoundStmt {
     pub stack_offset: u16,
     pub children: Vec<NodeType>,
@@ -27,15 +29,18 @@ impl CompoundStmt {
 
 // LITERALS
 
+#[derive(Debug, PartialEq)]
 pub enum Literals {
     NUMBER(String),
     STR(String),
 }
 
+#[derive(Debug, PartialEq)]
 pub struct LiteralDecl {
     pub value: Literals,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct VariableDecl {
     pub stack_offset: u16,
     pub identifier: String,
