@@ -1,9 +1,7 @@
-use std::{
-    env::Args,
-};
+use std::env::Args;
 
 pub struct Parameters {
-    pub file_path: String
+    pub file_path: String,
 }
 
 impl From<Args> for Parameters {

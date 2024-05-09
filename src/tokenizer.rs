@@ -16,8 +16,8 @@ pub enum TokenType {
     COMMA,
 
     FnCall,
-LeftParenthesis,
-RightParenthesis,
+    LeftParenthesis,
+    RightParenthesis,
 
     // Operators
     PLUS,
@@ -29,6 +29,9 @@ RightParenthesis,
     // Keywords
     IF,
     LET,
+
+    //LOOPS
+    FOR,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -92,8 +95,6 @@ impl Iterator for Tokenizer {
                     _ => TokenType::IDENT(ident.clone()),
                 };
 
-                //assert_eq!(TokenType::IDENT(ident.clone()), token_type);
-
                 let mut is_numeric = true;
                 for c in &token_buffer {
                     if !c.is_digit(10) {
@@ -108,6 +109,10 @@ impl Iterator for Tokenizer {
                     token_type = TokenType::NUMBER(number);
                 }
 
+                if ident == "for" {
+                    token_type = TokenType::FOR;
+                }
+
                 if ident == "let" {
                     token_type = TokenType::LET;
                 }
@@ -116,12 +121,11 @@ impl Iterator for Tokenizer {
                     token_type = TokenType::IF;
                 }
 
-                if i+1 != self.chars.len() && self.chars[i+1] == '(' {
+                if i + 1 != self.chars.len() && self.chars[i + 1] == '(' {
                     token_type = TokenType::FnCall;
                     is_fn_arg = true;
                 }
 
-                let _tmp = i - token_buffer.len();
                 let result = Some(Token {
                     token_type,
                     start: i - token_buffer.len(),
@@ -220,7 +224,7 @@ mod tests {
 
     #[test]
     fn respects_valid_delimiters() {
-        let valid_delimeters = vec!["; ", ";    ",  ";", ";\t"];
+        let valid_delimeters = vec!["; ", ";    ", ";", ";\t"];
 
         for delimiter in valid_delimeters {
             let tokenizer = Tokenizer::new(&format!("let a = 2{delimiter}let b = 10;"));

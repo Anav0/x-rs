@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq)]
 pub enum NodeType {
     Variable(VariableDecl),
@@ -13,7 +12,10 @@ pub struct CompoundStmt {
 
 impl CompoundStmt {
     pub fn new(stack_offset: u16) -> Self {
-        Self { stack_offset, children: vec![] }
+        Self {
+            stack_offset,
+            children: vec![],
+        }
     }
 }
 
@@ -41,4 +43,18 @@ pub struct FunctionDecl {
     pub stack_offset: u16,
     pub identifier: String,
     pub literal: LiteralDecl,
+}
+
+pub struct IncDecl {
+    // Which literal is incremented
+    pub literal_index: u32,
+    pub literal_scope_index: u32,
+}
+
+pub struct LoopDecl {
+    pub jmp_label_declaration: String, //for(u8 i = 12; i < 100; i++)
+    //---------^------------------
+    pub jmp_label_conditional: String, //for(u8 i = 12; i < 100; i++)
+    //-----------------^----------
+    pub jmp_label_body: String,
 }

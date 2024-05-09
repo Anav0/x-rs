@@ -2,12 +2,12 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
+mod assembly;
+mod declarations;
 mod misc;
 mod parser;
 mod symbols;
 mod tokenizer;
-mod declarations;
-mod assembly;
 
 use assembly::Assembler;
 use misc::Parameters;
@@ -26,9 +26,10 @@ fn main() {
 
     let mut file_content = String::new();
 
-    file.read_to_string(&mut file_content).expect("Failed to read file into string");
+    file.read_to_string(&mut file_content)
+        .expect("Failed to read file into string");
 
-    let tokenizer  = Tokenizer::new(&file_content);
+    let tokenizer = Tokenizer::new(&file_content);
     let mut parser = Parser::new(global_scope);
 
     let mut assembly = Assembler::new("out");

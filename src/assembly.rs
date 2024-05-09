@@ -1,11 +1,9 @@
 use std::fs;
 
 use crate::{
-    declarations::{NodeType, VariableDecl, Literals},
-    parser::{AST, get_var_size},
+    declarations::{Literals, NodeType, VariableDecl},
+    parser::{get_var_size, AST},
 };
-
-pub struct Instuction {}
 
 pub struct Assembler {
     output: String,
@@ -29,7 +27,7 @@ impl Assembler {
         for node_type in nodes {
             match node_type {
                 NodeType::Variable(variable_decl) => self.var(variable_decl),
-                NodeType::Stmt(stmt) => {},
+                NodeType::Stmt(stmt) => {}
             }
         }
     }
@@ -38,12 +36,14 @@ impl Assembler {
         self.assemble_based_on_nodes(&ast.nodes)
     }
 
-    pub fn func(& mut self) {}
+    pub fn func(&mut self) {}
 
     pub fn var(&mut self, variable_decl: &VariableDecl) {
         let var_type = match variable_decl.literal.value {
             Literals::NUMBER(_) => "QWORD",
-            Literals::STR(_) => panic!("String is not yet supported as a variable declaration type"),
+            Literals::STR(_) => {
+                panic!("String is not yet supported as a variable declaration type")
+            }
         };
 
         let var_size: u16 = get_var_size(variable_decl);

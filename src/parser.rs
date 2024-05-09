@@ -1,18 +1,14 @@
-use crate::{
-    declarations::{Literals, CompoundStmt, LiteralDecl, NodeType, VariableDecl},
-};
+use crate::declarations::{CompoundStmt, LiteralDecl, Literals, NodeType, VariableDecl};
 
-use std::{
-    iter::Peekable,
-};
+use std::iter::Peekable;
 
 //TODO: move
 pub fn get_var_size(decl: &VariableDecl) -> u16 {
- match decl.literal.value {
-            Literals::NUMBER(_) => 16, //NOTE: for now all numbers have the same size
-            Literals::STR(_) => 32,
-        }
+    match decl.literal.value {
+        Literals::NUMBER(_) => 16, //NOTE: for now all numbers have the same size
+        Literals::STR(_) => 32,
     }
+}
 
 use crate::{
     symbols::CodeScope,
@@ -35,9 +31,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self, tokenizer: Tokenizer) -> AST {
-        let mut ast = AST {
-            nodes: vec![],
-        };
+        let mut ast = AST { nodes: vec![] };
 
         let chars = &tokenizer.chars.clone(); //TODO: get rid of this clone!
         let mut iter = tokenizer.peekable();
@@ -73,16 +67,50 @@ impl Parser {
                 continue;
             }
 
+            if (current_token == TokenType::FOR) {
+                let for_loop = self
+                    .match_for_loop(&mut new_scope, current_token, &mut iter, chars, &mut ast)
+                    .expect("Failed to parse for loop");
+            }
+
             let stmt = self
                 .match_stmt(&mut new_scope, current_token, &mut iter, chars, &mut ast)
                 .expect("Failed to match statment");
 
             //Add to root node
             ast.nodes.push(NodeType::Stmt(stmt));
-        
         }
 
         ast
+    }
+
+    fn match_for_loop(
+        &mut self,
+        scope: &mut CodeScope,
+        current_token: Token,
+        tokenizer: &mut Peekable<Tokenizer>,
+        chars: &Vec<char>,
+        ast: &mut AST,
+    ) -> Option<CompoundStmt> {
+        if current_token_token_type != TokenType::FOR {
+            return None;
+        }
+
+        //expects space
+        let next_token = tokenizer.next();
+        if (next_token != ' ') {
+            panic!("space expected after for statment");
+        }
+
+        let literal = self.match_literal(current_token, tokenizer, chars, ast);
+        if self.match_digit(&current_token) {
+            let value: String = chars[current_token.start..current_token.start + current_token.len]
+                .into_iter()
+                .collect();
+            return Some(Literals::NUMBER(value));
+        }
+
+        None
     }
 
     fn match_stmt(
@@ -138,15 +166,13 @@ impl Parser {
                 scope.stack_pointer += get_var_size(&decl);
 
                 ast.nodes.push(NodeType::Variable(decl));
-                stmt.children.push(ast.nodes.len()-1);
+                stmt.children.push(ast.nodes.len() - 1);
 
                 return Some(stmt);
             }
             _ => None,
         };
     }
-
-    
 
     fn match_literal(
         &mut self,
@@ -156,7 +182,7 @@ impl Parser {
         ast: &mut AST,
     ) -> Option<Literals> {
         if self.match_digit(&current_token) {
-            let value: String = chars[current_token.start..current_token.start+current_token.len]
+            let value: String = chars[current_token.start..current_token.start + current_token.len]
                 .into_iter()
                 .collect();
             return Some(Literals::NUMBER(value));
@@ -191,9 +217,9 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
+    use crate::declarations::{CompoundStmt, NodeType};
+    use crate::symbols::CodeScope;
     use crate::tokenizer::{Token, Tokenizer};
-    use crate::declarations::{NodeType, CompoundStmt };
-    use crate::symbols::{CodeScope};
 
     use super::Parser;
 
@@ -208,6 +234,12 @@ mod tests {
         let ast = parser.parse(tokenizer);
 
         assert_eq!(ast.nodes.len(), 8);
-        assert_eq!(ast.nodes[0], NodeType::Stmt( CompoundStmt { stack_offset: 0, children: vec![] } ));
+        assert_eq!(
+            ast.nodes[0],
+            NodeType::Stmt(CompoundStmt {
+                stack_offset: 0,
+                children: vec![]
+            })
+        );
     }
 }
